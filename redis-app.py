@@ -13,7 +13,7 @@ app = Flask(__name__)
 REDIS_HOST = "mydbsecond-headless.rec-naresh.svc.cluster.local"
 REDIS_PORT = 18777
 REDIS_USERNAME = "default"
-REDIS_PASSWORD = "OGczdcmC"
+REDIS_PASSWORD = ""
 
 # TLS certificate paths
 CLIENT_CERT_PATH = "/app/client_cert.pem"
