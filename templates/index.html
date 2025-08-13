@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redis Data Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .action-btn {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+        .action-btn:active {
+            transform: translateY(0);
+        }
+        .stats-btn {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            color: #333;
+        }
+        .clear-btn {
+            background: linear-gradient(135deg, #ff9a9e, #fecfef);
+            color: #333;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #4facfe;
+        }
+        .results h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .result-item {
+            background: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 3px solid #4facfe;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .result-key {
+            font-weight: bold;
+            color: #e74c3c;
+            font-family: 'Courier New', monospace;
+        }
+        .result-value {
+            margin-top: 5px;
+            color: #2c3e50;
+            font-family: 'Courier New', monospace;
+            background: #ecf0f1;
+            padding: 8px;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            border-left-color: #c62828;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            border-left-color: #2e7d32;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4facfe;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Redis Data Generator</h1>
+            <p>Generate and store different types of data structures in your Redis database</p>
+        </div>
+        
+        <div class="content">
+            <div class="button-grid">
+                <button class="action-btn" onclick="generateData('strings')">
+                    📝 Generate 10 Strings
+                </button>
+                <button class="action-btn" onclick="generateData('hashes')">
+                    🗂️ Generate 10 Hashes
+                </button>
+                <button class="action-btn" onclick="generateData('sets')">
+                    🎯 Generate 10 Sets
+                </button>
+                <button class="action-btn" onclick="generateData('lists')">
+                    📋 Generate 10 Lists
+                </button>
+                <button class="action-btn" onclick="generateData('sorted_sets')">
+                    🏆 Generate 10 Sorted Sets
+                </button>
+                <button class="action-btn stats-btn" onclick="getStats()">
+                    📊 Get Database Stats
+                </button>
+                <button class="action-btn clear-btn" onclick="clearAll()">
+                    🗑️ Clear All Data
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing...</p>
+            </div>
+            
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function displayResults(data, type) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (data.error) {
+                resultsDiv.innerHTML = `
+                    <div class="results error">
+                        <h3>❌ Error</h3>
+                        <p>${data.error}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (type === 'stats') {
+                const statsHtml = Object.entries(data.stats).map(([key, value]) => 
+                    `<div class="stat-item">
+                        <div class="stat-value">${value}</div>
+                        <div class="stat-label">${key.replace(/_/g, ' ').toUpperCase()}</div>
+                    </div>`
+                ).join('');
+
+                resultsDiv.innerHTML = `
+                    <div class="results success">
+                        <h3>📊 Database Statistics</h3>
+                        <div class="stats-grid">
+                            ${statsHtml}
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            if (data.message) {
+                resultsDiv.innerHTML = `
+                    <div class="results success">
+                        <h3>✅ Success</h3>
+                        <p>${data.message}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const itemsHtml = data.data.map(item => 
+                `<div class="result-item">
+                    <div class="result-key">Key: ${item.key}</div>
+                    <div class="result-value">Value: ${JSON.stringify(item.value, null, 2)}</div>
+                </div>`
+            ).join('');
+
+            resultsDiv.innerHTML = `
+                <div class="results success">
+                    <h3>✅ Generated ${data.data.length} ${data.type.replace('_', ' ').toUpperCase()}</h3>
+                    ${itemsHtml}
+                </div>
+            `;
+        }
+
+        function generateData(type) {
+            showLoading();
+            
+            fetch(`/generate_${type}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                displayResults(data, type);
+            })
+            .catch(error => {
+                hideLoading();
+                displayResults({error: 'Network error: ' + error.message}, type);
+            });
+        }
+
+        function getStats() {
+            showLoading();
+            
+            fetch('/get_stats')
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                displayResults(data, 'stats');
+            })
+            .catch(error => {
+                hideLoading();
+                displayResults({error: 'Network error: ' + error.message}, 'stats');
+            });
+        }
+
+        function clearAll() {
+            if (confirm('Are you sure you want to clear ALL data from the Redis database? This action cannot be undone!')) {
+                showLoading();
+                
+                fetch('/clear_all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    displayResults(data, 'clear');
+                })
+                .catch(error => {
+                    hideLoading();
+                    displayResults({error: 'Network error: ' + error.message}, 'clear');
+                });
+            }
+        }
+
+        // Load stats on page load
+        window.onload = function() {
+            getStats();
+        };
+    </script>
+</body>
+</html>

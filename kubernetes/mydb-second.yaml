@@ -1,0 +1,16 @@
+apiVersion: app.redislabs.com/v1alpha1
+kind: RedisEnterpriseDatabase
+metadata:
+  name: mydbsecond
+  namespace: rec-naresh
+spec:
+  memorySize: 1GB
+  shardCount: 1
+  tlsMode: enabled
+  replication: false
+  redisEnterpriseCluster:
+    name: my-rec
+  defaultUser: true
+  modulesList:
+    - name: search
+    - name: ReJSON

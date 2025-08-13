@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: python-redis-pod
+  namespace: app-naresh
+  labels:
+    app: python-redis
+spec:
+  containers:
+  - name: python-redis-container
+    image: python:3.11-slim
+    command: ["/bin/bash"]
+    args: ["-c", "apt-get update && apt-get install -y redis-server openssl && redis-server --daemonize yes && tail -f /dev/null"]
+    ports:
+    - containerPort: 6379
+      name: redis
+    - containerPort: 8000
+      name: python-app
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+    env:
+    - name: PYTHONUNBUFFERED
+      value: "1"
+  restartPolicy: Always
